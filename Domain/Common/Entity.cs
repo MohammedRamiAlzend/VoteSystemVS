@@ -1,4 +1,6 @@
-﻿namespace Domain.Common;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Common;
 
 /// <summary>
 /// Base class for all domain entities, providing identity and domain event management.
@@ -10,11 +12,13 @@ public abstract class Entity
     /// </summary>
     public int Id { get; set; }
 
+    [NotMapped]
     private readonly List<DomainEvents> _domainEvents = new();
 
     /// <summary>
     /// Gets the domain events associated with this entity.
     /// </summary>
+    [NotMapped]
     public IReadOnlyCollection<DomainEvents> DomainEvents => _domainEvents.AsReadOnly();
 
     protected Entity() { }

@@ -2,6 +2,6 @@ namespace Application.Features.Auth.Common;
 
 public interface IOtpService
 {
-    void SendOtp(string phoneNumber);
-    bool ValidateOtp(string phoneNumber, string otpCode);
+    Task<string> GenerateOtpAsync(string userId);
+    Task<bool> ValidateOtpAsync(string userId, string otp);
 }

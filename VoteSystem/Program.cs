@@ -23,6 +23,13 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
+// Seed default admins
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<Infrastructure.Data.AppDbContext>();
+    Infrastructure.Data.DbSeeder.SeedAdmins(dbContext);
+}
+
 // Redirect root URL to /scalar/v1
 app.Use(async (context, next) =>
 {

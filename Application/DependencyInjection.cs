@@ -1,4 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
+using MediatR;
+using System.Reflection;
+using Application.Features.Auth;
+using Application.Features.Auth.Common;
 
 namespace Application;
 
@@ -6,7 +10,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Add application services here
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IOtpService, OtpService>();
+
+        // Register MediatR and scan this assembly for handlers
+        services.AddMediatR(typeof(DependencyInjection).Assembly);
         return services;
     }
 }
