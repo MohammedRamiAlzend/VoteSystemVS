@@ -10,4 +10,5 @@ public class VoteQuestion : Entity
   public DateTime EndedAt { get; set; }
   public int VoteSessionId{ get; set; }
   public VoteSession VoteSession{ get; set; }
+  public ICollection<VoteQuestionOption> Options { get; set; } = [];
 }

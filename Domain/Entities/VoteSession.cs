@@ -7,4 +7,6 @@ public class VoteSession : Entity
   public DateTime StartedAt { get; set; }
   public DateTime EndedAt { get; set; } 
   public bool IsActive { get; set; }
+  public ICollection<AttendanceUser> AttendanceUsers { get; set; } = [];
+  public ICollection<VoteQuestion> Questions { get; set; } = [];
 }

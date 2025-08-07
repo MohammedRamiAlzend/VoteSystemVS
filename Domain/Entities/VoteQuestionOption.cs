@@ -5,4 +5,5 @@ public class VoteQuestionOption : Entity
   public string Title { get; set; }
   public int VoteQuestionId { get; set; }
   public VoteQuestion VoteQuestion { get; set; }
+  public ICollection<Vote> Votes { get; set; } = [];
 }

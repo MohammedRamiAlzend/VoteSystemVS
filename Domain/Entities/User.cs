@@ -12,5 +12,6 @@ public class User : Entity
     public DateTimeOffset CreatedAt { get; set; }
     public int CreatedByAdminId { get; set; }
     public Admin CreatedByAdmin { get; set; }
-
+    public ICollection<AttendanceUser> AttendanceUsers { get; set; } = [];
+    public ICollection<Vote> Votes { get; set; } = [];
 }
