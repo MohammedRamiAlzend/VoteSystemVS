@@ -8,7 +8,7 @@ public class AuditableEntity : Entity
     {
 
     }
-    protected AuditableEntity(Guid id) : base(id)
+    protected AuditableEntity(int id) : base(id)
     {
 
     }
