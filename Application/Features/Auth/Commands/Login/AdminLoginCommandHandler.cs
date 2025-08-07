@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 namespace Application.Features.Auth.Commands.Login;
 
-public class AdminLoginCommandHandler : IRequestHandler<AdminLoginCommand, AuthResultDto>
+public class AdminLoginCommandHandler : IRequestHandler<AdminLoginCommand, Result<AuthResultDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJwtTokenService _jwtTokenService;
@@ -23,22 +23,22 @@ public class AdminLoginCommandHandler : IRequestHandler<AdminLoginCommand, AuthR
         _mapper = mapper;
     }
 
-    public async Task<AuthResultDto> Handle(AdminLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResultDto>> Handle(AdminLoginCommand request, CancellationToken cancellationToken)
     {
         var adminRepo = _unitOfWork.AdminRepository;
         var adminResult = await adminRepo.FindAsync(a => a.UserName == request.UserName);
-        if (adminResult.IsSuccess is false || adminResult.Value is null || adminResult.Value.Count()==0)
+        if (adminResult.IsSuccess is false || adminResult.Value is null || !adminResult.Value.Any())
         {
-            throw new ArgumentException();
+            return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid username or password") };
         }
         var admin = adminResult.Value.First();
         if (admin == null || !BCrypt.Net.BCrypt.Verify(request.Password, admin.HashedPassword))
         {
-            throw new UnauthorizedAccessException("Invalid username or password");
+            return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid username or password") };
         }
 
         var token = _jwtTokenService.GenerateToken(admin.Id.ToString(), admin.UserName, "Admin", admin.UserName, "");
-        return new AuthResultDto
+        var result = new AuthResultDto
         {
             Token = token,
             UserName = admin.UserName,
@@ -46,5 +46,6 @@ public class AdminLoginCommandHandler : IRequestHandler<AdminLoginCommand, AuthR
             FullName = admin.UserName,
             PhoneNumber = string.Empty
         };
+        return Result<AuthResultDto>.Success(result);
     }
 }
