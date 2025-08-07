@@ -27,8 +27,13 @@ public class UserLoginWithOtpCommandHandler : IRequestHandler<UserLoginWithOtpCo
 
     public async Task<Result<AuthResultDto>> Handle(UserLoginWithOtpCommand request, CancellationToken cancellationToken)
     {
-        var userRepo = _unitOfWork.Repository<User>();
-        var user = await userRepo.Query().FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber, cancellationToken);
+        var userRepo = _unitOfWork.UserRepository;
+        var userResult = await userRepo.FindAsync(u => u.PhoneNumber == request.PhoneNumber);
+        if (userResult.IsError || userResult.Value is null || userResult.Value.Count() == 0)
+        {
+            return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid phone number or OTP code") };
+        }
+        var user = userResult.Value.First();
         if (user == null || !_otpService.ValidateOtp(request.PhoneNumber, request.OtpCode))
         {
             return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid phone number or OTP code") };
@@ -43,6 +48,6 @@ public class UserLoginWithOtpCommandHandler : IRequestHandler<UserLoginWithOtpCo
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber
         };
-        return Result<AuthResultDto>.Success(result);
+        return result;
     }
 }
