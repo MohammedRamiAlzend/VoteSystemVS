@@ -20,14 +20,14 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateUserAttencanceCommand command)
+    public async Task<IActionResult> Create([FromForm] CreateUserAttencanceCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(UpdateAttendanceUserCommand command)
+    public async Task<IActionResult> Update([FromForm] UpdateAttendanceUserCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);

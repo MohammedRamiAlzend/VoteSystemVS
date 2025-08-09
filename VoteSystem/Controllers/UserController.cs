@@ -3,6 +3,7 @@ using Application.Features.UserGroup.Commands.Update;
 using Application.Features.UserGroup.Commands.Delete;
 using Application.Features.UserGroup.Queries.GetById;
 using Application.Features.UserGroup.Queries.GetAll;
+using Application.Features.UserGroup.Queries.GetByPhoneNumberOrEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,14 +21,14 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateUserCommand command)
+    public async Task<IActionResult> Create([FromForm] CreateUserCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(UpdateUserCommand command)
+    public async Task<IActionResult> Update([FromForm] UpdateUserCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
@@ -53,6 +54,14 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var query = new GetAllUserQuery();
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+    }
+
+    [HttpGet("by-contact")]
+    public async Task<IActionResult> GetByPhoneNumberOrEmail([FromQuery] string? phoneNumber, [FromQuery] string? email)
+    {
+        var query = new GetUserByPhoneNumberOrEmailQuery(phoneNumber, email);
         var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
     }

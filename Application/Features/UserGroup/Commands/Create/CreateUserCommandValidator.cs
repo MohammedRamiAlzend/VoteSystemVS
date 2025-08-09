@@ -9,6 +9,5 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.FullName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.PhoneNumber).NotEmpty().MaximumLength(20);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(250);
-        RuleFor(x => x.CreatedByAdminId).NotEmpty();
     }
 }

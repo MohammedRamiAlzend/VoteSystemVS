@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using FluentValidation;
+using Application.Features.UserGroup.Common;
 
 namespace Application.Features.UserGroup.Commands.Create;
 

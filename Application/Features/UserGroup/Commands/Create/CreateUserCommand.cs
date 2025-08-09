@@ -8,6 +8,5 @@ public record CreateUserCommand(
     string FullName,
     string PhoneNumber,
     string Email,
-    bool IsActive,
-    int CreatedByAdminId
+    bool IsActive
 ) : IRequest<Result<UserDto>>;
