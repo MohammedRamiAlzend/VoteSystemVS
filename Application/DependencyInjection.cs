@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MediatR;
 using Application.Features.Auth;
 using Application.Features.Auth.Common;
+using FluentValidation;
 
 namespace Application;
 
@@ -16,6 +17,8 @@ public static class DependencyInjection
         services.AddMediatR(typeof(DependencyInjection).Assembly);
 
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
+
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly,includeInternalTypes:true);
         return services;
     }
 }

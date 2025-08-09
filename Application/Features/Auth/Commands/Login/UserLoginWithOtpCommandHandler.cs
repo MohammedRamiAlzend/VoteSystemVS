@@ -1,19 +1,26 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Features.Auth.Common;
 using AutoMapper;
+using Domain.Common.Results;
 using Domain.Entities;
+using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
-using Domain.Common.Results;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Auth.Commands.Login;
 
-public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService, ISender mapper) : IRequestHandler<UserLoginWithOtpCommand, Result<AuthResultDto>>
+public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService,IValidator<UserLoginWithOtpCommand> validator) : IRequestHandler<UserLoginWithOtpCommand, Result<AuthResultDto>>
 {
     public async Task<Result<AuthResultDto>> Handle(UserLoginWithOtpCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
         var userRepo = unitOfWork.UserRepository;
         var userResult = await userRepo.FindAsync(u => u.PhoneNumber == request.PhoneNumber);
         if (userResult.IsError || userResult.Value is null || userResult.Value.Count() == 0)

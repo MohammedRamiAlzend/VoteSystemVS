@@ -1,4 +1,5 @@
 ﻿using Domain.Common.Results;
+using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,18 +8,17 @@ namespace Application.Features.VoteSessionGroup.Commands.UpdateVoteSessionStatus
 
 public class UpdateVoteSessionStatusCommandHandler(
     IUnitOfWork repo,
-    ILogger<UpdateVoteSessionStatusCommandHandler> logger)
+    ILogger<UpdateVoteSessionStatusCommandHandler> logger,
+    IValidator<UpdateVoteSessionStatusCommand> validator)
         : IRequestHandler<UpdateVoteSessionStatusCommand, Result<Updated>>
 {
-
-    /// <summary>
-    /// Handles the command to update the status of a vote session.
-    /// </summary>
-    /// <param name="request">The command containing the vote session ID and new status.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public async Task<Result<Updated>> Handle(UpdateVoteSessionStatusCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
         logger.LogInformation("Processing UpdateVoteSessionStatus for VoteSessionId {VoteSessionId}", request.VoteSessionId);
 
         var getVoteSession = await repo.VoteSessionRepository.GetByIdAsync(request.VoteSessionId);

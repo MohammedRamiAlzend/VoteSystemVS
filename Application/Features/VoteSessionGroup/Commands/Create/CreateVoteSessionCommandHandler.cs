@@ -4,29 +4,36 @@ using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Domain.Common.Results;
 using Microsoft.Extensions.Logging;
+using FluentValidation;
+using FluentValidation.Results;
 
 namespace Application.Features.VoteSessionGroup.Commands.Create;
-public record CreateVoteSessionCommand(CreateVoteSessionDto Dto) : IRequest<Result<VoteSessionDto>>;
 
 public class CreateVoteSessionCommandHandler
     (
         IUnitOfWork repo,
+        IValidator<CreateVoteSessionCommand> validator,
         ILogger<CreateVoteSessionCommandHandler> logger
     )
     : IRequestHandler<CreateVoteSessionCommand, Result<VoteSessionDto>>
 {
     public async Task<Result<VoteSessionDto>> Handle(CreateVoteSessionCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request,cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
+
         var voteSession = new VoteSession
         {
-            Description = request.Dto.Description,
-            IsActive = request.Dto.IsActive,
-            StartedAt = request.Dto.StartedAt,
-            TopicTitle = request.Dto.TopicTitle,
-            EndedAt = request.Dto.EndedAt
+            Description = request.Description,
+            StartedAt = request.StartedAt,
+            TopicTitle = request.TopicTitle,
+            EndedAt = request.EndedAt
         };
         var addingResult = await repo.VoteSessionRepository.AddAsync(voteSession);
-        var commitChanges = await repo.SaveChangesAsync();
+        var commitChanges = await repo.SaveChangesAsync(cancellationToken);
         if (addingResult.IsError)
         {
             return addingResult.TopError;
@@ -39,10 +46,14 @@ public class CreateVoteSessionCommandHandler
         {
             Id = voteSession.Id,
             Description = voteSession.Description,
-            IsActive = voteSession.IsActive,
+            VoteSessionStatus = voteSession.VoteSessionStatus,
             StartedAt = voteSession.StartedAt,
             TopicTitle = voteSession.TopicTitle,
             EndedAt = voteSession.EndedAt
         };
     }
+
+
+
+
 }

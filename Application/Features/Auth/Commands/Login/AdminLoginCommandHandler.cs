@@ -1,17 +1,23 @@
 using Application.Features.Auth.Common;
 using AutoMapper;
 using Domain.Common.Results;
+using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using System.Security.Cryptography;
 using System.Text;
 namespace Application.Features.Auth.Commands.Login;
 
-public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, ISender mapper) : IRequestHandler<AdminLoginCommand, Result<AuthResultDto>>
+public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService,IValidator<AdminLoginCommand> validator) : IRequestHandler<AdminLoginCommand, Result<AuthResultDto>>
 {
 
   public async Task<Result<AuthResultDto>> Handle(AdminLoginCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
         var adminRepo = unitOfWork.AdminRepository;
         var adminResult = await adminRepo.FindAsync(a => a.UserName == request.UserName);
         if (adminResult.IsSuccess is false || adminResult.Value is null || !adminResult.Value.Any())

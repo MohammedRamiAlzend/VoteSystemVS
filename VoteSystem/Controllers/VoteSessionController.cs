@@ -11,8 +11,8 @@ namespace VoteSystem.Controllers;
 public class VoteSessionController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<Result<VoteSessionDto>>> Create([FromBody] CreateVoteSessionDto dto)
+    public async Task<ActionResult<Result<VoteSessionDto>>> Create([FromQuery]CreateVoteSessionCommand command)
     {
-        return await mediator.Send(new CreateVoteSessionCommand(dto));
+        return await mediator.Send(command);
     }
 }

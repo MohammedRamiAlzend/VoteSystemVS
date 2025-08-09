@@ -1,19 +1,27 @@
 ﻿using Domain.Common.Results;
 using Domain.Entities;
+using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.Features.VoteQuestionGroup.Handlers.Create;
 
 public class CreateVoteQuestionCommandHandler
     (
         IUnitOfWork repo,
-        ILogger<CreateVoteQuestionCommandHandler> logger
+        ILogger<CreateVoteQuestionCommandHandler> logger,
+        IValidator<CreateVoteQuestionCommand> validator
     ) : IRequestHandler<CreateVoteQuestionCommand, Result<Created>>
 {
     public async Task<Result<Created>> Handle(CreateVoteQuestionCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
         logger.LogInformation("Creating vote question for VoteSessionId {VoteSessionId}", request.VoteSessionId);
 
         var voteSessionResult = await repo.VoteSessionRepository.GetByIdAsync(request.VoteSessionId);

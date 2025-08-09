@@ -1,9 +1,11 @@
 ﻿using Application.Features.VoteQuestionOptionGroup.Handlers.Create;
 using Domain.Common.Results;
 using Domain.Entities;
+using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.Features.VoteQuestionGroup.Handlers.Create;
 
@@ -12,11 +14,17 @@ namespace Application.Features.VoteQuestionGroup.Handlers.Create;
 public class CreateVoteQuestionOptionCommandHandler
     (
         IUnitOfWork repo,
-        ILogger<CreateVoteQuestionOptionCommandHandler> logger
+        ILogger<CreateVoteQuestionOptionCommandHandler> logger,
+        IValidator<CreateVoteQuestionOptionCommand> validator
     ) : IRequestHandler<CreateVoteQuestionOptionCommand, Result<Created>>
 {
     public async Task<Result<Created>> Handle(CreateVoteQuestionOptionCommand request, CancellationToken cancellationToken)
     {
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
+        if (validatorResult.IsValid)
+        {
+            validatorResult.Errors.MapFromFluentValidationErrors();
+        }
         logger.LogInformation("Adding vote question options for VoteQuestionId {VoteQuestionId}", request.VoteQuestionId);
 
         var voteQuestionResult = await repo.VoteQuestionRepository.GetByIdAsync(request.VoteQuestionId);
