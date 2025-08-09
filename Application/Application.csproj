@@ -19,4 +19,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.13.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\Commands\" />
+  </ItemGroup>
 </Project>

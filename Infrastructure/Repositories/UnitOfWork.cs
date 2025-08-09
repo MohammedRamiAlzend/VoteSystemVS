@@ -1,12 +1,17 @@
+using Domain.Common;
 using Domain.Common.Results;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Abstractions;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace Infrastructure.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
+    private readonly Dictionary<Type, object> _repos = [];
+
     private readonly AppDbContext _context;
     private IRepository<Admin> _adminRepository;
     private IRepository<AttendanceUser> _attendanceUserRepository;
@@ -33,14 +38,29 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<VoteQuestionOption> VoteQuestionOptionRepository => _voteQuestionOptionRepository ??= new Repository<VoteQuestionOption>(_context);
     public IRepository<VoteSession> VoteSessionRepository => _voteSessionRepository ??= new Repository<VoteSession>(_context);
 
-    public async Task<Result<Success>> SaveChangesAsync()
+    public async Task<Result<Success>> SaveChangesAsync(CancellationToken token)
     {
-        await _context.SaveChangesAsync();
-        return Result.Success;
+        try
+        {
+            await _context.SaveChangesAsync(token);
+            return Result.Success;
+        }
+        catch (Exception e)
+        {
+            return Error.Failure(description: e.Message);
+        }
     }
 
     public void Dispose()
     {
         _context.Dispose();
+    }
+    public IRepository<TEntity> GetRepository<TEntity>() where TEntity : Entity
+    {
+        if (_repos.ContainsKey(typeof(TEntity)))
+            return (IRepository<TEntity>)_repos[typeof(TEntity)];
+        IRepository<TEntity> newRepo = new Repository<TEntity>(_context);
+        _repos.Add(typeof(TEntity), newRepo);
+        return newRepo;
     }
 }

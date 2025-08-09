@@ -159,7 +159,23 @@ public class Repository<T> : IRepository<T> where T : Entity
             return Error.Failure("Remove", ex.Message);
         }
     }
-
+    /// <summary>
+    /// Updates an entity.
+    /// </summary>
+    /// <param name="entity">The entity to update.</param>
+    /// <returns>A result indicating the success of the operation.</returns>
+    public async Task<Result<Success>> UpdateAsync(T entity)
+    {
+        try
+        {
+            _dbSet.Update(entity);
+            return await Task.FromResult(Result.Success);
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure("Update", ex.Message);
+        }
+    }
     /// <summary>
     /// Removes a range of entities.
     /// </summary>
