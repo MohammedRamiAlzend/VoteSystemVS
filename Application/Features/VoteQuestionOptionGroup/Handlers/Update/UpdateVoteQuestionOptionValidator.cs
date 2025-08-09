@@ -11,13 +11,13 @@ namespace Application.Features.VoteQuestionOptionGroup.Handlers.Update
     {
         public UpdateVoteQuestionOptionValidator()
         {
-            RuleFor(x=>x.Options).NotEmpty().NotNull()
+            RuleFor(x => x.Options).NotEmpty().NotNull()
                 .WithMessage("At least one option must be provided for update.");
 
             RuleFor(x => x.Options).Must(
                 x =>
                 {
-                    if(x.Any(o=>o.Id<= 0))
+                    if (x.Any(o => o.Id <= 0))
                     {
                         return false;
                     }

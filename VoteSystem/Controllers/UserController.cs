@@ -21,14 +21,14 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm] CreateUserCommand command)
+    public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromForm] UpdateUserCommand command)
+    public async Task<IActionResult> Update([FromBody] UpdateUserCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);

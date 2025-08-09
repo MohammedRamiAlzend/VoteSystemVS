@@ -20,14 +20,14 @@ public class VoteController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm] CreateVoteCommand command)
+    public async Task<IActionResult> Create([FromBody] CreateVoteCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromForm] UpdateVoteCommand command)
+    public async Task<IActionResult> Update([FromBody] UpdateVoteCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);

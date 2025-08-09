@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Features.VoteSessionGroup.Commands.UpdateVoteSessionStatus
 {
-    public class UpdateVoteSessionStatusValidator:AbstractValidator<UpdateVoteSessionStatusCommand>
+    public class UpdateVoteSessionStatusValidator : AbstractValidator<UpdateVoteSessionStatusCommand>
     {
         public UpdateVoteSessionStatusValidator()
         {
