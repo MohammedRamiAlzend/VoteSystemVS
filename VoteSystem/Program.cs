@@ -1,37 +1,58 @@
-using Infrastructure;
 using Application;
+using Infrastructure;
 using Scalar.AspNetCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
+});
+
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevelopmentCorsPolicy",
         policy =>
         {
             policy
-                .AllowAnyOrigin() 
+                .AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
 });
 var app = builder.Build();
 
-// Seed default admins
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<Infrastructure.Data.AppDbContext>();
     Infrastructure.Data.DbSeeder.SeedAdmins(dbContext);
 }
 
-// Redirect root URL to /scalar/v1
 app.Use(async (context, next) =>
 {
     if (context.Request.Path == "/")
@@ -42,18 +63,18 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.Servers = [];
-    });
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+{
+    options.Servers = [];
+});
 // }
-    app.UseCors("DevelopmentCorsPolicy");
+app.UseCors("DevelopmentCorsPolicy");
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();
