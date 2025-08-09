@@ -193,4 +193,24 @@ public class Repository<T> : IRepository<T> where T : Entity
             return Error.Failure("RemoveRange", ex.Message);
         }
     }
+    /// <summary>
+    /// Removes a range of entities.
+    /// </summary>
+    /// <param name="entities">The entities to remove.</param>
+    /// <returns>A result indicating the success of the operation.</returns>
+    ///
+    public async Task<Result<Success>> AnyAsync(Expression<Func<T, bool>>? filter = null)
+    {
+        try
+        {
+            var result = await _dbSet.AnyAsync(filter);
+            if (!result)
+                return Error.NotFound();
+            return await Task.FromResult(Result.Success);
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure("RemoveRange", ex.Message);
+        }
+    }
 }

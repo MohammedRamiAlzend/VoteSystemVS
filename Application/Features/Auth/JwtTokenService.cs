@@ -24,11 +24,6 @@ public class JwtTokenService : IJwtTokenService
 
     public string GenerateToken(string userId, string userName, string role, string fullName, string phoneNumber)
     {
-        //    Issuer = _configuration["Jwt:Issuer"],
-        //    Audience = _configuration["Jwt:Audience"]
-        //};
-        //var token = tokenHandler.CreateToken(tokenDescriptor);
-
         var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),

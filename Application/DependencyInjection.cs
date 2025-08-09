@@ -1,9 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
-using System.Reflection;
 using Application.Features.Auth;
 using Application.Features.Auth.Common;
-using Application.Features.VoteSessionGroup.Commands.Create;
 
 namespace Application;
 
@@ -18,7 +16,6 @@ public static class DependencyInjection
         services.AddMediatR(typeof(DependencyInjection).Assembly);
 
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
-
         return services;
     }
 }

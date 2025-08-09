@@ -15,4 +15,5 @@ public interface IRepository<T> where T : Entity
     Task<Result<Success>> Remove(T entity);
     Task<Result<Success>> UpdateAsync(T entity);
     Task<Result<Success>> RemoveRange(IEnumerable<T> entities);
+    Task<Result<Success>> AnyAsync(Expression<Func<T, bool>>? filter = null);
 }
