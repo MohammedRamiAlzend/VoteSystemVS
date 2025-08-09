@@ -32,6 +32,10 @@ public class UpdateVoteSessionStatusCommandHandler(
             logger.LogWarning("VoteSession with ID {VoteSessionId} not found", request.VoteSessionId);
             return Error.NotFound(description: "Vote session does not exist");
         }
+        if(getVoteSession.Value.VoteSessionStatus is Domain.Entities.VoteSessionStatus.Closed)
+        {
+            return Error.Failure(description: "you cannot update closed vote session status");
+        }
         getVoteSession.Value.VoteSessionStatus = request.VoteSessionStatus;
         var updateResult = await repo.VoteSessionRepository.UpdateAsync(getVoteSession.Value);
         if (updateResult.IsError)
