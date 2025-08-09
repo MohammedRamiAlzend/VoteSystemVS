@@ -6,6 +6,8 @@ using Domain.Common.Results;
 using Microsoft.Extensions.Logging;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Application.Features.VoteSessionGroup.Commands.Create;
 
@@ -13,13 +15,14 @@ public class CreateVoteSessionCommandHandler
     (
         IUnitOfWork repo,
         IValidator<CreateVoteSessionCommand> validator,
-        ILogger<CreateVoteSessionCommandHandler> logger
+        ILogger<CreateVoteSessionCommandHandler> logger,
+        IHttpContextAccessor context
     )
     : IRequestHandler<CreateVoteSessionCommand, Result<VoteSessionDto>>
 {
     public async Task<Result<VoteSessionDto>> Handle(CreateVoteSessionCommand request, CancellationToken cancellationToken)
     {
-        var validatorResult = await validator.ValidateAsync(request,cancellationToken);
+        var validatorResult = await validator.ValidateAsync(request, cancellationToken);
         if (validatorResult.IsValid)
         {
             validatorResult.Errors.MapFromFluentValidationErrors();
@@ -42,6 +45,25 @@ public class CreateVoteSessionCommandHandler
         {
             return commitChanges.TopError;
         }
+
+        // Get admin from context to log action
+        var getAdminFromContext = context.HttpContext?.User;
+        string performedBy = "Unknown Admin";
+        if (getAdminFromContext != null && (getAdminFromContext.IsInRole("Admin") || getAdminFromContext.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin")))
+        {
+            performedBy = getAdminFromContext.Identity.Name ?? "Unknown Admin";
+        }
+
+        // Log the vote session creation
+        var systemLog = new SystemLog
+        {
+            Action = $"Vote session '{request.TopicTitle}' created",
+            PerformedBy = performedBy,
+            TimeStamp = DateTime.UtcNow
+        };
+        await repo.SystemLogRepository.AddAsync(systemLog);
+        await repo.SaveChangesAsync(cancellationToken);
+
         return new VoteSessionDto
         {
             Id = voteSession.Id,

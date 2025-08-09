@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Auth.Commands.Login;
 
-public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService,IValidator<UserLoginWithOtpCommand> validator) : IRequestHandler<UserLoginWithOtpCommand, Result<AuthResultDto>>
+public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService, IValidator<UserLoginWithOtpCommand> validator) : IRequestHandler<UserLoginWithOtpCommand, Result<AuthResultDto>>
 {
     public async Task<Result<AuthResultDto>> Handle(UserLoginWithOtpCommand request, CancellationToken cancellationToken)
     {
@@ -42,6 +42,17 @@ public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService 
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber
         };
+
+        // Log the successful user login
+        var systemLog = new SystemLog
+        {
+            Action = "User Login via OTP",
+            PerformedBy = user.PhoneNumber, // Or user.FullName if preferred
+            TimeStamp = DateTime.UtcNow
+        };
+        await unitOfWork.SystemLogRepository.AddAsync(systemLog);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return result;
     }
 }

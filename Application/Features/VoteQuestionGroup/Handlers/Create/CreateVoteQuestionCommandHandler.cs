@@ -5,6 +5,8 @@ using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Application.Features.VoteQuestionGroup.Handlers.Create;
 
@@ -12,7 +14,8 @@ public class CreateVoteQuestionCommandHandler
     (
         IUnitOfWork repo,
         ILogger<CreateVoteQuestionCommandHandler> logger,
-        IValidator<CreateVoteQuestionCommand> validator
+        IValidator<CreateVoteQuestionCommand> validator,
+        IHttpContextAccessor context
     ) : IRequestHandler<CreateVoteQuestionCommand, Result<Created>>
 {
     public async Task<Result<Created>> Handle(CreateVoteQuestionCommand request, CancellationToken cancellationToken)
@@ -55,6 +58,14 @@ public class CreateVoteQuestionCommandHandler
             return saveChangesResult.Errors;
         }
 
+        // Get admin from context to log action
+        var getAdminFromContext = context.HttpContext?.User;
+        string performedBy = "Unknown Admin";
+        if (getAdminFromContext != null && (getAdminFromContext.IsInRole("Admin") || getAdminFromContext.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin")))
+        {
+            performedBy = getAdminFromContext.Identity.Name ?? "Unknown Admin";
+        }
+
         if (request.Options.Count > 0)
         {
             List<VoteQuestionOption> voteQuestionOptions = [.. request.Options.Select(x => new VoteQuestionOption
@@ -78,6 +89,16 @@ public class CreateVoteQuestionCommandHandler
                 return saveOptionsResult.Errors;
             }
         }
+
+        // Log the vote question creation
+        var systemLog = new SystemLog
+        {
+            Action = $"Vote question '{request.Title}' created for VoteSessionId {request.VoteSessionId}",
+            PerformedBy = performedBy,
+            TimeStamp = DateTime.UtcNow
+        };
+        await repo.SystemLogRepository.AddAsync(systemLog);
+        await repo.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Vote question created successfully for VoteSessionId {VoteSessionId}", request.VoteSessionId);
         return Result.Created;

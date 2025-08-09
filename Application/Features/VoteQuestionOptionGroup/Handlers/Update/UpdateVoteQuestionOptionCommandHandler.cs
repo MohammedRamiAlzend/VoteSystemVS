@@ -3,13 +3,16 @@ using Domain.Entities;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Application.Features.VoteQuestionOptionGroup.Handlers.Update;
 
 public class UpdateVoteQuestionOptionCommandHandler
     (
         IUnitOfWork repo,
-        ILogger<UpdateVoteQuestionOptionCommandHandler> logger
+        ILogger<UpdateVoteQuestionOptionCommandHandler> logger,
+        IHttpContextAccessor context
     ) : IRequestHandler<UpdateVoteQuestionOptionCommand, Result<Updated>>
 {
     public async Task<Result<Updated>> Handle(UpdateVoteQuestionOptionCommand request, CancellationToken cancellationToken)
@@ -70,6 +73,24 @@ public class UpdateVoteQuestionOptionCommandHandler
             logger.LogError("Failed to save updated vote question options: {Errors}", saveResult.Errors);
             return saveResult.Errors;
         }
+
+        // Get admin from context to log action
+        var getAdminFromContext = context.HttpContext?.User;
+        string performedBy = "Unknown Admin";
+        if (getAdminFromContext != null && (getAdminFromContext.IsInRole("Admin") || getAdminFromContext.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin")))
+        {
+            performedBy = getAdminFromContext.Identity.Name ?? "Unknown Admin";
+        }
+
+        // Log the vote question option update
+        var systemLog = new SystemLog
+        {
+            Action = $"Vote question option updated for VoteQuestionId {request.VoteQuestionId}",
+            PerformedBy = performedBy,
+            TimeStamp = DateTime.UtcNow
+        };
+        await repo.SystemLogRepository.AddAsync(systemLog);
+        await repo.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Successfully updated {OptionCount} vote question options for VoteQuestionId {VoteQuestionId}", request.Options.Count, request.VoteQuestionId);
         return Result.Updated;

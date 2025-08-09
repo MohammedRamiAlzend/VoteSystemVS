@@ -83,6 +83,16 @@ namespace Application.Features.AttendanceUserGroup.Commands.Create
                 return commit.Errors;
             }
 
+            // Log the attendance creation
+            var systemLog = new SystemLog
+            {
+                Action = $"Attendance created for UserId {request.UserId} in VoteSessionId {request.VoteSessionId}",
+                PerformedBy = getAdminFromContext.Identity.Name ?? "Unknown Admin", // Assuming admin's name is in Identity.Name
+                TimeStamp = DateTime.UtcNow
+            };
+            await repo.SystemLogRepository.AddAsync(systemLog);
+            await repo.SaveChangesAsync(cancellationToken);
+
             logger.LogInformation("Attendance created successfully for UserId {UserId} in VoteSessionId {VoteSessionId}", request.UserId, request.VoteSessionId);
             return Result.Created;
         }

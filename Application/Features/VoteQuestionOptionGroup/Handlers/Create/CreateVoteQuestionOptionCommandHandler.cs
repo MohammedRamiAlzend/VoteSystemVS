@@ -6,16 +6,17 @@ using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
-namespace Application.Features.VoteQuestionGroup.Handlers.Create;
-
-
+namespace Application.Features.VoteQuestionOptionGroup.Handlers.Create;
 
 public class CreateVoteQuestionOptionCommandHandler
     (
         IUnitOfWork repo,
         ILogger<CreateVoteQuestionOptionCommandHandler> logger,
-        IValidator<CreateVoteQuestionOptionCommand> validator
+        IValidator<CreateVoteQuestionOptionCommand> validator,
+        IHttpContextAccessor context
     ) : IRequestHandler<CreateVoteQuestionOptionCommand, Result<Created>>
 {
     public async Task<Result<Created>> Handle(CreateVoteQuestionOptionCommand request, CancellationToken cancellationToken)
@@ -55,6 +56,24 @@ public class CreateVoteQuestionOptionCommandHandler
             logger.LogError("Failed to save vote question options: {Errors}", saveResult.Errors);
             return saveResult.Errors;
         }
+
+        // Get admin from context to log action
+        var getAdminFromContext = context.HttpContext?.User;
+        string performedBy = "Unknown Admin";
+        if (getAdminFromContext != null && (getAdminFromContext.IsInRole("Admin") || getAdminFromContext.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin")))
+        {
+            performedBy = getAdminFromContext.Identity.Name ?? "Unknown Admin";
+        }
+
+        // Log the vote question option creation
+        var systemLog = new SystemLog
+        {
+            Action = $"Vote question option created for VoteQuestionId {request.VoteQuestionId}",
+            PerformedBy = performedBy,
+            TimeStamp = DateTime.UtcNow
+        };
+        await repo.SystemLogRepository.AddAsync(systemLog);
+        await repo.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Successfully added {OptionCount} vote question options for VoteQuestionId {VoteQuestionId}", voteQuestionOptions.Count, request.VoteQuestionId);
         return Result.Created;

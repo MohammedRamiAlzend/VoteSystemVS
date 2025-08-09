@@ -6,12 +6,14 @@ using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using System.Security.Cryptography;
 using System.Text;
+using Domain.Entities;
+
 namespace Application.Features.Auth.Commands.Login;
 
-public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService,IValidator<AdminLoginCommand> validator) : IRequestHandler<AdminLoginCommand, Result<AuthResultDto>>
+public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IValidator<AdminLoginCommand> validator) : IRequestHandler<AdminLoginCommand, Result<AuthResultDto>>
 {
 
-  public async Task<Result<AuthResultDto>> Handle(AdminLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResultDto>> Handle(AdminLoginCommand request, CancellationToken cancellationToken)
     {
         var validatorResult = await validator.ValidateAsync(request, cancellationToken);
         if (validatorResult.IsValid)
@@ -40,6 +42,17 @@ public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService j
             FullName = admin.UserName,
             PhoneNumber = string.Empty
         };
+
+        // Log the successful admin login
+        var systemLog = new SystemLog
+        {
+            Action = "Admin Login",
+            PerformedBy = admin.UserName,
+            TimeStamp = DateTime.UtcNow
+        };
+        await unitOfWork.SystemLogRepository.AddAsync(systemLog);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return result;
     }
     private static string HashPassword(string password)

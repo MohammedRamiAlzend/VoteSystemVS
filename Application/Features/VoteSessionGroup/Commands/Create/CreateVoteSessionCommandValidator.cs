@@ -7,15 +7,15 @@ public class CreateVoteSessionCommandValidator : AbstractValidator<CreateVoteSes
 {
     public CreateVoteSessionCommandValidator()
     {
-        RuleFor(x => x.Dto.TopicTitle)
+        RuleFor(x => x.TopicTitle)
             .NotEmpty().WithMessage("Topic title is required.")
             .MaximumLength(200).WithMessage("Topic title cannot exceed 200 characters.");
 
-        RuleFor(x => x.Dto.StartedAt)
+        RuleFor(x => x.StartedAt)
             .NotEmpty().WithMessage("Start date is required.");
 
-        RuleFor(x => x.Dto.EndedAt)
+        RuleFor(x => x.EndedAt)
             .NotEmpty().WithMessage("End date is required.")
-            .GreaterThan(x => x.Dto.StartedAt).WithMessage("End date must be after start date.");
+            .GreaterThan(x => x.StartedAt).WithMessage("End date must be after start date.");
     }
 }
