@@ -72,7 +72,6 @@ public class Repository<T> : IRepository<T> where T : Entity
             {
                 query = include(query);
             }
-
             return await query.ToListAsync();
         }
         catch (Exception ex)
@@ -169,6 +168,19 @@ public class Repository<T> : IRepository<T> where T : Entity
         try
         {
             _dbSet.Update(entity);
+            return await Task.FromResult(Result.Success);
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure("Update", ex.Message);
+        }
+    }
+
+    public async Task<Result<Success>> UpdateRangeAsync(IEnumerable<T> entities)
+    {
+        try
+        {
+            _dbSet.UpdateRange(entities);
             return await Task.FromResult(Result.Success);
         }
         catch (Exception ex)
