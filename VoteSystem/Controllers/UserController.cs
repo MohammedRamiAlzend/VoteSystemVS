@@ -24,14 +24,14 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Create([FromForm] CreateUserCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromForm] UpdateUserCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpDelete("{id}")]
@@ -39,7 +39,7 @@ public class UserController : ControllerBase
     {
         var command = new DeleteUserCommand(id);
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpGet("{id}")]
@@ -47,7 +47,7 @@ public class UserController : ControllerBase
     {
         var query = new GetUserQuery(id);
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpGet]
@@ -55,7 +55,7 @@ public class UserController : ControllerBase
     {
         var query = new GetAllUserQuery();
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpGet("by-contact")]
@@ -63,6 +63,6 @@ public class UserController : ControllerBase
     {
         var query = new GetUserByPhoneNumberOrEmailQuery(phoneNumber, email);
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 }

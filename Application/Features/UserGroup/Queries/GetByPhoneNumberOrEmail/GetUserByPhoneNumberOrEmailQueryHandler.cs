@@ -1,5 +1,6 @@
 using Application.Features.UserGroup.Common;
 using Domain.Common.Results;
+using Domain.Entities;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -21,13 +22,13 @@ public class GetUserByPhoneNumberOrEmailQueryHandler
             return Error.Validation(description: "Either PhoneNumber or Email must be provided.");
         }
 
-        var userResult = new Result<IEnumerable<Domain.Entities.User>>([]);
+        Result<IEnumerable<User>> userResult;
 
         if (!string.IsNullOrEmpty(request.PhoneNumber))
         {
             userResult = await repo.UserRepository.FindAsync(u => u.PhoneNumber == request.PhoneNumber);
         }
-        else if (!string.IsNullOrEmpty(request.Email))
+        else
         {
             userResult = await repo.UserRepository.FindAsync(u => u.Email == request.Email);
         }

@@ -20,17 +20,17 @@ public class VoteController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateVoteCommand command)
+    public async Task<IActionResult> Create([FromForm] CreateVoteCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(UpdateVoteCommand command)
+    public async Task<IActionResult> Update([FromForm] UpdateVoteCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpDelete("{id}")]
@@ -38,7 +38,7 @@ public class VoteController : ControllerBase
     {
         var command = new DeleteVoteCommand(id);
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpGet("{id}")]
@@ -46,7 +46,7 @@ public class VoteController : ControllerBase
     {
         var query = new GetVoteQuery(id);
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpGet]
@@ -54,6 +54,6 @@ public class VoteController : ControllerBase
     {
         var query = new GetAllVoteQuery();
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 }

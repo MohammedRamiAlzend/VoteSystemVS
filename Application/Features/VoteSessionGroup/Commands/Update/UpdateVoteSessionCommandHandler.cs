@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using Domain.Entities;
 
 namespace Application.Features.VoteSessionGroup.Commands.Update;
 
