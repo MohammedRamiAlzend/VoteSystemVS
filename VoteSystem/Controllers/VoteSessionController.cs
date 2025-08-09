@@ -1,6 +1,7 @@
 using Application.Features.VoteSessionGroup.Commands.Create;
 using Application.Features.VoteSessionGroup.Commands.UpdateVoteSessionStatus;
 using Application.Features.VoteSessionGroup.Commands.Delete;
+using Application.Features.VoteSessionGroup.Commands.Update;
 using Application.Features.VoteSessionGroup.Queries.GetById;
 using Application.Features.VoteSessionGroup.Queries.GetAll;
 using MediatR;
@@ -23,7 +24,14 @@ public class VoteSessionController : ControllerBase
     public async Task<IActionResult> Create(CreateVoteSessionCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result ) : BadRequest(result.Errors);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Update(UpdateVoteSessionCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut("status")]
