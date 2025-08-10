@@ -22,26 +22,36 @@ public class JwtTokenService : IJwtTokenService
         _configuration = configuration;
     }
 
-    public string GenerateToken(string userId, string userName, string role, string fullName, string phoneNumber)
+    public string GenerateToken(string userId, string role, string? fullName = null, string? phoneNumber=null, string? email = null)
     {
-        var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, role),
-                new Claim("FullName", fullName),
-                new Claim("PhoneNumber", phoneNumber),
-            };
-        var ket = _configuration["Jwt:Key"];
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+        List<Claim> claims =
+        [
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Role, role),
+
+        ];
+
+        if (fullName != null)
+        {
+            claims.Add(new Claim(ClaimTypes.Name, fullName));
+        }
+        if (phoneNumber != null)
+        {
+            claims.Add(new Claim("PhoneNumber", phoneNumber));
+        }
+        if (email != null)
+        {
+            claims.Add(new Claim("Email", email));
+        }
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
         var token = new JwtSecurityToken(
                     claims: claims,
-                    expires: DateTime.UtcNow.AddDays(2),
+                    expires: role=="Admin"? DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(1),
                     signingCredentials: creds,
                     issuer: _configuration["Jwt:Issuer"],
-                    audience : _configuration["Jwt:Audience"]
+                    audience: _configuration["Jwt:Audience"]
                 );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

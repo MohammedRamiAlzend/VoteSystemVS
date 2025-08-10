@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Register FrontendSettings from configuration
+builder.Services.Configure<Application.Common.Settings.FrontendSettings>(
+    builder.Configuration.GetSection("Frontend"));
+
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();

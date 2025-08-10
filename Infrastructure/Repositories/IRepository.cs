@@ -8,6 +8,7 @@ namespace Infrastructure.Repositories;
 public interface IRepository<T> where T : Entity
 {
     Task<Result<T?>> GetByIdAsync(int id, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
+    Task<Result<T?>> GetByFilterAsync(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
     Task<Result<IEnumerable<T>>> GetAllAsync(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
     Task<Result<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
     Task<Result<Success>> AddAsync(T entity);

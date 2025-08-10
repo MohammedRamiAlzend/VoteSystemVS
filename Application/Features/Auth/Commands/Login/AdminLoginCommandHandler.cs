@@ -33,7 +33,7 @@ public class AdminLoginCommandHandler(IUnitOfWork unitOfWork, IJwtTokenService j
             return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid username or password") };
         }
 
-        var token = jwtTokenService.GenerateToken(admin.Id.ToString(), admin.UserName, "Admin", admin.UserName, "");
+        var token = jwtTokenService.GenerateToken(admin.Id.ToString(), "Admin");
         var result = new AuthResultDto
         {
             Token = token,

@@ -10,4 +10,10 @@ public class AttendanceUser : Entity
     public OTPCode OTPCode { get; set; }
     public Admin CreatedByAdmin { get; set; }
     public int CreatedByAdminId { get; set; }
+
+
+    public void SetOtpCode(OTPCode oTPCode)
+    {
+        OTPCode = oTPCode;
+    }
 }

@@ -1,4 +1,6 @@
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.Login.UserLogin.WithEmail;
+using Application.Features.Auth.Commands.Login.UserLogin.WithPhoneNumber;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,10 +24,25 @@ public class AuthController : ControllerBase
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
-    [HttpPost("user-login-otp")]
-    public async Task<IActionResult> UserLoginWithOtp(UserLoginWithOtpCommand command)
+    [HttpPost("user-login-phoneNumber")]
+    public async Task<IActionResult> UserLoginWithPhoneNumber(UserLoginWithPoneNumberCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
+    [HttpPost("user-login-Email")]
+    public async Task<IActionResult> UserLoginWithEmail(UserLoginWithEmailCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
+    }
+    [HttpPost("request-email-otp")]
+    public async Task<IActionResult> RequestEmailOtp(RequestEmailOtpCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
+    }
+
+
+
 }

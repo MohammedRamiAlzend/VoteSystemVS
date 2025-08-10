@@ -51,6 +51,26 @@ public class Repository<T> : IRepository<T> where T : Entity
         }
     }
 
+
+    public async Task<Result<T?>> GetByFilterAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+    {
+        try
+        {
+            IQueryable<T> query = _dbSet;
+            if (include is not null)
+            {
+                query = include(query);
+            }
+
+            var entity = await query.FirstOrDefaultAsync(filter);
+            return entity is not null ? entity : Error.NotFound();
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure("GetByIdAsync", ex.Message);
+        }
+    }
+
     /// <summary>
     /// Gets all entities asynchronously.
     /// </summary>

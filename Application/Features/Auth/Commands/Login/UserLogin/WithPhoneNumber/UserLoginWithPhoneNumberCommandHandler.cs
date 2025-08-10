@@ -5,16 +5,12 @@ using Domain.Entities;
 using FluentValidation;
 using Infrastructure.Repositories.Abstractions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Application.Features.Auth.Commands.Login;
+namespace Application.Features.Auth.Commands.Login.UserLogin.WithPhoneNumber;
 
-public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService, IValidator<UserLoginWithOtpCommand> validator) : IRequestHandler<UserLoginWithOtpCommand, Result<AuthResultDto>>
+public class UserLoginWithPhoneNumberCommandHandler(IUnitOfWork unitOfWork, IOtpService otpService, IJwtTokenService jwtTokenService, IValidator<UserLoginWithPoneNumberCommand> validator) : IRequestHandler<UserLoginWithPoneNumberCommand, Result<AuthResultDto>>
 {
-    public async Task<Result<AuthResultDto>> Handle(UserLoginWithOtpCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResultDto>> Handle(UserLoginWithPoneNumberCommand request, CancellationToken cancellationToken)
     {
         var validatorResult = await validator.ValidateAsync(request, cancellationToken);
         if (validatorResult.IsValid)
@@ -28,7 +24,7 @@ public class UserLoginWithOtpCommandHandler(IUnitOfWork unitOfWork, IOtpService 
             return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid phone number or OTP code") };
         }
         var user = userResult.Value.First();
-        if (user == null || !(await otpService.ValidateOtpAsync(request.PhoneNumber, request.OtpCode)))
+        if (user == null || !await otpService.ValidateOtpAsync(request.PhoneNumber, request.OtpCode))
         {
             return new List<Error> { Error.Unauthorized("Unauthorized", "Invalid phone number or OTP code") };
         }
