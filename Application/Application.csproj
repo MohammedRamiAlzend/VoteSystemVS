@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\Commands\" />
+    <Folder Include="Features\VoteGroup\Queries\GetAll\ForUser\" />
     <Folder Include="Features\VoteQuestionGroup\Common\" />
     <Folder Include="Features\VoteQuestionOptionGroup\Common\" />
   </ItemGroup>

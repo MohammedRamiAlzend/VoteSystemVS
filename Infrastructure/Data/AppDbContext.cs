@@ -36,6 +36,7 @@ public class AppDbContext : DbContext
     public DbSet<VoteQuestion> VoteQuestions { get; set; }
     public DbSet<VoteQuestionOption> VoteQuestionOptions { get; set; }
     public DbSet<VoteSession> VoteSessions { get; set; }
+    public DbSet<VoteSessionMagicLinkToken> VoteSessionMagicLinkTokens { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,44 +51,44 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<VoteQuestionOption>()
             .HasOne(o => o.VoteQuestion)
-            .WithMany()
+            .WithMany(x=>x.Options)
             .HasForeignKey(o => o.VoteQuestionId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Vote>()
             .HasOne(v => v.User)
-            .WithMany()
+            .WithMany(x=>x.Votes)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Vote>()
             .HasOne(v => v.VoteQuestionOption)
-            .WithMany()
+            .WithMany(x=>x.Votes)
             .HasForeignKey(v => v.VoteQuestionOptionId)
             .OnDelete(DeleteBehavior.NoAction);
 
 
         modelBuilder.Entity<VoteQuestion>()
             .HasOne(vq => vq.VoteSession)
-            .WithMany()
+            .WithMany(x=>x.Questions)
             .HasForeignKey(vq => vq.VoteSessionId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AttendanceUser>()
             .HasOne(au => au.User)
-            .WithMany()
+            .WithMany(x=>x.AttendanceUsers)
             .HasForeignKey(au => au.UserId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AttendanceUser>()
             .HasOne(au => au.VoteSession)
-            .WithMany()
+            .WithMany(x=>x.AttendanceUsers)
             .HasForeignKey(au => au.VoteSessionId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AttendanceUser>()
             .HasOne(au => au.CreatedByAdmin)
-            .WithMany()
+            .WithMany(x=>x.CreatedAttendanceUsersByAdmin)
             .HasForeignKey(au => au.CreatedByAdminId)
             .OnDelete(DeleteBehavior.NoAction);
     }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250807050045_FixCascadeDelete22")]
-    partial class FixCascadeDelete22
+    [Migration("20250814213334_IntitialCreate")]
+    partial class IntitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,43 +54,29 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AdminId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CreatedByAdminId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OTPCodeID")
+                    b.Property<int?>("OTPCodeID")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("VoteSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("VoteSessionId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminId");
-
                     b.HasIndex("CreatedByAdminId");
 
                     b.HasIndex("OTPCodeID")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[OTPCodeID] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
-
                     b.HasIndex("VoteSessionId");
-
-                    b.HasIndex("VoteSessionId1");
 
                     b.ToTable("AttendanceUsers");
                 });
@@ -192,13 +178,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("VoteQuestionOptionId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("VoteQuestionOptionId1")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("VotedAt")
@@ -208,11 +188,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
-
                     b.HasIndex("VoteQuestionOptionId");
-
-                    b.HasIndex("VoteQuestionOptionId1");
 
                     b.ToTable("Votes");
                 });
@@ -241,14 +217,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("VoteSessionId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VoteSessionId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("VoteSessionId");
-
-                    b.HasIndex("VoteSessionId1");
 
                     b.ToTable("VoteQuestions");
                 });
@@ -268,14 +239,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("VoteQuestionId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VoteQuestionId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("VoteQuestionId");
-
-                    b.HasIndex("VoteQuestionId1");
 
                     b.ToTable("VoteQuestionOptions");
                 });
@@ -294,9 +260,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("EndedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
 
@@ -304,48 +267,73 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("VoteSessionStatus")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("VoteSessions");
                 });
 
+            modelBuilder.Entity("Domain.Entities.VoteSessionMagicLinkToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttendanceUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoteSessionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttendanceUserId");
+
+                    b.HasIndex("VoteSessionId");
+
+                    b.ToTable("VoteSessionMagicLinkTokens");
+                });
+
             modelBuilder.Entity("Domain.Entities.AttendanceUser", b =>
                 {
-                    b.HasOne("Domain.Entities.Admin", null)
-                        .WithMany("CreatedAttendanceUsersByAdmin")
-                        .HasForeignKey("AdminId");
-
                     b.HasOne("Domain.Entities.Admin", "CreatedByAdmin")
-                        .WithMany()
+                        .WithMany("CreatedAttendanceUsersByAdmin")
                         .HasForeignKey("CreatedByAdminId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.OTPCode", "OTPCode")
                         .WithOne("AttendanceUser")
-                        .HasForeignKey("Domain.Entities.AttendanceUser", "OTPCodeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Domain.Entities.AttendanceUser", "OTPCodeID");
 
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("AttendanceUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("AttendanceUsers")
-                        .HasForeignKey("UserId1");
-
                     b.HasOne("Domain.Entities.VoteSession", "VoteSession")
-                        .WithMany()
+                        .WithMany("AttendanceUsers")
                         .HasForeignKey("VoteSessionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.VoteSession", null)
-                        .WithMany("AttendanceUsers")
-                        .HasForeignKey("VoteSessionId1");
 
                     b.Navigation("CreatedByAdmin");
 
@@ -370,24 +358,16 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Vote", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Votes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Votes")
-                        .HasForeignKey("UserId1");
-
                     b.HasOne("Domain.Entities.VoteQuestionOption", "VoteQuestionOption")
-                        .WithMany()
+                        .WithMany("Votes")
                         .HasForeignKey("VoteQuestionOptionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.VoteQuestionOption", null)
-                        .WithMany("Votes")
-                        .HasForeignKey("VoteQuestionOptionId1");
 
                     b.Navigation("User");
 
@@ -397,14 +377,10 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.VoteQuestion", b =>
                 {
                     b.HasOne("Domain.Entities.VoteSession", "VoteSession")
-                        .WithMany()
+                        .WithMany("Questions")
                         .HasForeignKey("VoteSessionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("Domain.Entities.VoteSession", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("VoteSessionId1");
 
                     b.Navigation("VoteSession");
                 });
@@ -412,16 +388,31 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.VoteQuestionOption", b =>
                 {
                     b.HasOne("Domain.Entities.VoteQuestion", "VoteQuestion")
-                        .WithMany()
+                        .WithMany("Options")
                         .HasForeignKey("VoteQuestionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.VoteQuestion", null)
-                        .WithMany("Options")
-                        .HasForeignKey("VoteQuestionId1");
-
                     b.Navigation("VoteQuestion");
+                });
+
+            modelBuilder.Entity("Domain.Entities.VoteSessionMagicLinkToken", b =>
+                {
+                    b.HasOne("Domain.Entities.AttendanceUser", "AttendanceUser")
+                        .WithMany()
+                        .HasForeignKey("AttendanceUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.VoteSession", "VoteSession")
+                        .WithMany()
+                        .HasForeignKey("VoteSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttendanceUser");
+
+                    b.Navigation("VoteSession");
                 });
 
             modelBuilder.Entity("Domain.Entities.Admin", b =>

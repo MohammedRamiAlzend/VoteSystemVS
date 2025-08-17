@@ -5,31 +5,26 @@ using Application.Features.AttendanceUserGroup.Queries.GetById;
 using Application.Features.AttendanceUserGroup.Queries.GetAll;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VoteSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AttendanceController : ControllerBase
+[Authorize(Roles = "Admin")]
+public class AttendanceController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public AttendanceController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserAttencanceCommand command)
     {
-        var result = await _mediator.Send(command);
+        var result = await mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] UpdateAttendanceUserCommand command)
     {
-        var result = await _mediator.Send(command);
+        var result = await mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
@@ -37,7 +32,7 @@ public class AttendanceController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var query = new GetAttendanceUserQuery(id);
-        var result = await _mediator.Send(query);
+        var result = await mediator.Send(query);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
@@ -45,7 +40,7 @@ public class AttendanceController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var query = new GetAllAttendanceUserQuery();
-        var result = await _mediator.Send(query);
+        var result = await mediator.Send(query);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 
@@ -53,7 +48,7 @@ public class AttendanceController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var command = new DeleteAttendanceUserCommand(id);
-        var result = await _mediator.Send(command);
+        var result = await mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result.Errors);
     }
 }

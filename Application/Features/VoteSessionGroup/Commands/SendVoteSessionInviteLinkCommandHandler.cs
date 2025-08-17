@@ -38,14 +38,27 @@ public class SendVoteSessionInviteLinkCommandHandler(
             logger.LogWarning("Attendance user not found for email: {Email} in VoteSessionId: {VoteSessionId}", request.Email, request.VoteSessionId);
             return Error.NotFound("Attendance user not found for this email in the vote session");
         }
-        var link = $"{_frontendSettings.VoteSessionJoinBaseUrl}?sessionId={request.VoteSessionId}&email={attendanceUser.User.Email}";
-        
+        var token = Guid.NewGuid().ToString("N");
+        var now = DateTime.UtcNow;
+        var magicLinkToken = new Domain.Entities.VoteSessionMagicLinkToken
+        {
+            AttendanceUserId = attendanceUser.Id,
+            VoteSessionId = request.VoteSessionId,
+            Token = token,
+            CreatedAt = now,
+            ExpiredAt = now.AddMinutes(30),
+            IsUsed = false
+        };
+        await repo.VoteSessionMagicLinkTokenRepository.AddAsync(magicLinkToken);
+        await repo.SaveChangesAsync(cancellationToken);
+
+        var link = $"{_frontendSettings.VoteSessionJoinBaseUrl}?token={token}";
         var result = await emailService.SendVoteSessionInviteEmailAsync(request: new SessionEmailInviteDto(attendanceUser.User.Email, link));
         if(result.IsError)
         {
             return result.Errors;
         }
-        logger.LogInformation("Sent vote session invite link to {Email} for VoteSessionId: {VoteSessionId}", attendanceUser.User.Email, voteSession.Id);
+        logger.LogInformation("Sent vote session magic link to {Email} for VoteSessionId: {VoteSessionId}", attendanceUser.User.Email, request.VoteSessionId);
         return Result.Success;
     }
 }

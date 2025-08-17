@@ -4,4 +4,4 @@ using Application.Features.VoteGroup.Common;
 
 namespace Application.Features.VoteGroup.Queries.GetById;
 
-public record GetVoteQuery(int Id) : IRequest<Result<VoteDto>>;
+public record GetVoteQuery(int Id) : IRequest<Result<VoteDTO>>;

@@ -60,7 +60,10 @@ public class CreateVoteSessionCommandHandler
             Action = $"Vote session '{request.TopicTitle}' created",
             PerformedBy = performedBy,
             TimeStamp = DateTime.UtcNow
+            
+
         };
+
         await repo.SystemLogRepository.AddAsync(systemLog);
         await repo.SaveChangesAsync(cancellationToken);
 

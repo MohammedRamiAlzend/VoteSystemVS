@@ -1,24 +1,21 @@
 using Application.Features.UserGroup.Commands.Create;
-using Application.Features.UserGroup.Commands.Update;
 using Application.Features.UserGroup.Commands.Delete;
-using Application.Features.UserGroup.Queries.GetById;
+using Application.Features.UserGroup.Commands.Update;
 using Application.Features.UserGroup.Queries.GetAll;
+using Application.Features.UserGroup.Queries.GetById;
 using Application.Features.UserGroup.Queries.GetByPhoneNumberOrEmail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VoteSystem.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+[Authorize(Roles = "Admin")]
+public class UserController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public UserController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserCommand command)

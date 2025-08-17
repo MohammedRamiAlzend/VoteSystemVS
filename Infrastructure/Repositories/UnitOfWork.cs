@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<VoteQuestion> _voteQuestionRepository;
     private IRepository<VoteQuestionOption> _voteQuestionOptionRepository;
     private IRepository<VoteSession> _voteSessionRepository;
+    private IRepository<VoteSessionMagicLinkToken> _voteSessionMagicLinkTokenRepository;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -37,6 +38,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<VoteQuestion> VoteQuestionRepository => _voteQuestionRepository ??= new Repository<VoteQuestion>(_context);
     public IRepository<VoteQuestionOption> VoteQuestionOptionRepository => _voteQuestionOptionRepository ??= new Repository<VoteQuestionOption>(_context);
     public IRepository<VoteSession> VoteSessionRepository => _voteSessionRepository ??= new Repository<VoteSession>(_context);
+    public IRepository<VoteSessionMagicLinkToken> VoteSessionMagicLinkTokenRepository => _voteSessionMagicLinkTokenRepository ??= new Repository<VoteSessionMagicLinkToken>(_context);
 
     public async Task<Result<Success>> SaveChangesAsync(CancellationToken token)
     {

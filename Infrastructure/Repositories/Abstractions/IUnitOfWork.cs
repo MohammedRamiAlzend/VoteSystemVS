@@ -18,5 +18,6 @@ public interface IUnitOfWork : IDisposable
     IRepository<VoteQuestion> VoteQuestionRepository { get; }
     IRepository<VoteQuestionOption> VoteQuestionOptionRepository { get; }
     IRepository<VoteSession> VoteSessionRepository { get; }
+    IRepository<VoteSessionMagicLinkToken> VoteSessionMagicLinkTokenRepository { get; }
     Task<Result<Success>> SaveChangesAsync(CancellationToken token);
 }

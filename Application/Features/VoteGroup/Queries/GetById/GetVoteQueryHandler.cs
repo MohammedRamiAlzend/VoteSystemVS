@@ -11,9 +11,9 @@ public class GetVoteQueryHandler
     (
         IUnitOfWork repo,
         ILogger<GetVoteQueryHandler> logger
-    ) : IRequestHandler<GetVoteQuery, Result<VoteDto>>
+    ) : IRequestHandler<GetVoteQuery, Result<VoteDTO>>
 {
-    public async Task<Result<VoteDto>> Handle(GetVoteQuery request, CancellationToken cancellationToken)
+    public async Task<Result<VoteDTO>> Handle(GetVoteQuery request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieving vote with ID {VoteId}", request.Id);
 
@@ -25,7 +25,7 @@ public class GetVoteQueryHandler
         }
 
         var vote = voteResult.Value;
-        var dto = new VoteDto
+        var dto = new VoteDTO
         {
             Id = vote.Id,
             VotedAt = vote.VotedAt,

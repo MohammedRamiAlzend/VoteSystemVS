@@ -21,7 +21,6 @@ public partial class SendVoteSessionInviteLinksCommandHandler(
 
     public async Task<Result<Success>> Handle(SendVoteSessionInviteLinksCommand request, CancellationToken cancellationToken)
     {
-        //var voteSessionResult = await repo.VoteSessionRepository.GetByIdAsync(request.VoteSessionId, include: i => i.Include(x => x.AttendanceUsers).ThenInclude(x => x.User));
         var attendanceUsersResult = await repo.AttendanceUserRepository.GetAllAsync(x=>x.VoteSessionId == request.VoteSessionId,include: i=>i.Include(x=>x.User));
         if (attendanceUsersResult.IsError) { return attendanceUsersResult.Errors; }
         if (attendanceUsersResult.Value is null)
@@ -32,10 +31,23 @@ public partial class SendVoteSessionInviteLinksCommandHandler(
         var attendanceUsers = attendanceUsersResult.Value;
         foreach (var attendanceUser in attendanceUsers)
         {
-            var link = $"{_frontendSettings.VoteSessionJoinBaseUrl}?sessionId={attendanceUser.VoteSessionId}&email={attendanceUser.User.Email}";
+            var token = Guid.NewGuid().ToString("N");
+            var now = DateTime.UtcNow;
+            var magicLinkToken = new Domain.Entities.VoteSessionMagicLinkToken
+            {
+                AttendanceUserId = attendanceUser.Id,
+                VoteSessionId = request.VoteSessionId,
+                Token = token,
+                CreatedAt = now,
+                ExpiredAt = now.AddMinutes(30), 
+                IsUsed = false
+            };
+            await repo.VoteSessionMagicLinkTokenRepository.AddAsync(magicLinkToken);
+            var link = $"{_frontendSettings.VoteSessionJoinBaseUrl}?token={token}";
             await emailService.SendVoteSessionInviteEmailAsync(new SessionEmailInviteDto(attendanceUser.User.Email, link));
         }
-        logger.LogInformation("Sent vote session invite links for VoteSessionId: {VoteSessionId}", request.VoteSessionId);
+        await repo.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Sent vote session magic links for VoteSessionId: {VoteSessionId}", request.VoteSessionId);
         return Result.Success;
     }
 }

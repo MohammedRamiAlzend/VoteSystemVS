@@ -1,6 +1,6 @@
 namespace Application.Features.VoteGroup.Common;
 
-public class VoteDto
+public class VoteDTO
 {
     public int Id { get; set; }
     public DateTime VotedAt { get; set; }
